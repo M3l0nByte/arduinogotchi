@@ -1,0 +1,135 @@
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 32
+
+#define JOY_X A0
+#define PET_BUTTON 8   // real button pin
+#define BUZZER_PIN 11  // passive buzzer pin
+
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+
+// ---------------- STATS ----------------
+int hunger = 80;     // 0 = starving, 100 = full
+int happiness = 80;  // 0 = sad, 100 = happy
+
+unsigned long lastDecay = 0;
+bool gameOver = false;
+
+// ---------------- SETUP ----------------
+void setup() {
+  pinMode(PET_BUTTON, INPUT_PULLUP);
+  pinMode(BUZZER_PIN, OUTPUT);
+
+  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
+    while (true);
+  }
+
+  display.clearDisplay();
+  display.display();
+}
+
+// ---------------- DRAW ----------------
+void drawPet() {
+  // Body
+  display.fillCircle(64, 18, 10, SSD1306_WHITE);
+
+  // Eyes
+  display.fillCircle(60, 16, 2, SSD1306_BLACK);
+  display.fillCircle(68, 16, 2, SSD1306_BLACK);
+
+  // Mouth (mood-based)
+  if (hunger < 30 || happiness < 30) {
+    display.drawLine(60, 22, 68, 22, SSD1306_BLACK); // sad
+  } else if (happiness > 70 && hunger > 70) {
+    display.drawLine(60, 18, 68, 22, SSD1306_BLACK); // big smile
+  } else {
+    display.drawLine(60, 20, 68, 20, SSD1306_BLACK); // neutral
+  }
+}
+
+void drawBars() {
+  // Hunger bar
+  display.drawRect(2, 2, 50, 6, SSD1306_WHITE);
+  display.fillRect(2, 2, hunger / 2, 6, SSD1306_WHITE);
+
+  // Happiness bar
+  display.drawRect(76, 2, 50, 6, SSD1306_WHITE);
+  display.fillRect(76, 2, happiness / 2, 6, SSD1306_WHITE);
+}
+
+// ---------------- FEEDBACK ----------------
+void beep(int times, int duration) {
+  for (int i = 0; i < times; i++) {
+    tone(BUZZER_PIN, 1000);
+    delay(duration);
+    noTone(BUZZER_PIN);
+    delay(duration / 2);
+  }
+}
+
+// ---------------- LOOP ----------------
+void loop() {
+  if (gameOver) {
+    display.clearDisplay();
+    display.setTextSize(1);
+    display.setTextColor(SSD1306_WHITE);
+    display.setCursor(10, 12);
+    display.println("Game Over. Reset to Play Again");
+    display.display();
+    return;
+  }
+
+  display.clearDisplay();
+
+  int joyX = analogRead(JOY_X);
+  bool petPressed = digitalRead(PET_BUTTON) == LOW;
+
+  // ----- INPUT -----
+  if (joyX < 400) {          // FEED
+    hunger += 1;
+    beep(1, 50);             // feedback sound
+  } 
+  else if (joyX > 600) {     // PLAY
+    happiness += 1;
+    beep(1, 50);             // feedback sound
+  }
+
+  if (petPressed) {          // PET BUTTON
+    happiness += 2;
+    beep(2, 50);             // feedback sound
+    delay(200);              // simple debounce
+  }
+
+  // Clamp values
+  hunger = constrain(hunger, 0, 100);
+  happiness = constrain(happiness, 0, 100);
+
+  // ----- TIME DECAY -----
+  if (millis() - lastDecay > 2000) {
+    lastDecay = millis();
+    hunger -= 1;
+    happiness -= 1;
+  }
+
+  hunger = constrain(hunger, 0, 100);
+  happiness = constrain(happiness, 0, 100);
+
+  // ----- CHECK GAME OVER -----
+  if (hunger <= 0 || happiness <= 0) {
+    gameOver = true;
+    tone(BUZZER_PIN, 500);  // long game over tone
+    delay(1000);
+    noTone(BUZZER_PIN);
+  }
+
+  // ----- DRAW -----
+  drawBars();
+  drawPet();
+  display.display();
+
+  delay(30);
+}
+// Made by techamelon
