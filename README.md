@@ -4,10 +4,11 @@ Tamagotchi with Arduino Uno or Mega or Nano
 I used an Mega 2560 for this!
 
  # You need:
-an Arduino Uno or Mega or Nano
-an Analog Joystick 
-An I2C Oled 128x32 (You can rewrite the code so it works on 128x64)
-Optinal: An Passive Buzzer (Passive Buzzer only works in V2)
+an Arduino Uno or Mega or Nano,
+an Analog Joystick ,
+An I2C Oled 128x32 (You can rewrite the code so it works on 128x64),
+Optinal: An Passive Buzzer (Passive Buzzer only works in V2),
+The Adafruit SSD1306 Library
 
 # Wiring:
 
