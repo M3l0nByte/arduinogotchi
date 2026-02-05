@@ -38,3 +38,8 @@ there are two versions. V1 and V2
 
 V1 has no GameOver and No Passive Buzzer
 V2 has an GameOver and has Support for Passive Buzzer but its not great!
+
+# Controls:
+
+Right is Petting | Right Bar is Happynis
+Left is Feeding | Left Bar is Hunger
