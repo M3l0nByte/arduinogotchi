@@ -13,17 +13,17 @@ Optinal: An Passive Buzzer (Passive Buzzer only works in V2)
 
 Analog Joystick:
 
-GND - GND
-+5V - 5V
+GND - GND,
++5V - 5V,
 VRx - A0
 
 -----------------------------
 
 I2C Oled 128x32:
 
-GND - GND
-VCC - 3.3V/3V3
-SCK - SCL (Check Arduino Pins Layout)
+GND - GND,
+VCC - 3.3V/3V3,
+SCK - SCL (Check Arduino Pins Layout),
 SDA - SDA (Check Arduino Pins Layout)
 
 -----------------------------
